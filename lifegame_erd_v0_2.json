@@ -1,0 +1,778 @@
+{
+  "version": "0.2",
+  "project": "LifeGame",
+  "generated_at": "2026-06-13",
+  "notes": [
+    "Core hierarchy: Life Goal → Project → Quest → Todo",
+    "My Status is the front page.",
+    "Health/Exercise/Diet v0.3 is planned after initial structure."
+  ],
+  "tables": [
+    {
+      "name": "users",
+      "description": "사용자 기본 정보. 초기에는 1인 앱이어도 웹서비스 확장성을 위해 유지한다.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "unique": true,
+          "nullable": true
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "avatar_url",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "unique(email)"
+      ]
+    },
+    {
+      "name": "life_goals",
+      "description": "인생 단위의 장기 목표.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "status",
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": "active"
+        },
+        {
+          "name": "progress",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": 0
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "target_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "status",
+        "priority"
+      ]
+    },
+    {
+      "name": "projects",
+      "description": "Life Goal을 달성하기 위한 중기 단위 프로젝트.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": "active"
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "progress",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": 0
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "target_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "status",
+        "priority",
+        "target_date"
+      ]
+    },
+    {
+      "name": "life_goal_projects",
+      "description": "Life Goal과 Project의 다대다 연결. weight는 목표 기여도.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "life_goal_id",
+          "type": "uuid",
+          "fk": "life_goals.id",
+          "nullable": false
+        },
+        {
+          "name": "project_id",
+          "type": "uuid",
+          "fk": "projects.id",
+          "nullable": false
+        },
+        {
+          "name": "weight",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": 1.0
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "life_goal_id",
+        "project_id",
+        "unique(life_goal_id, project_id)"
+      ]
+    },
+    {
+      "name": "quests",
+      "description": "프로젝트 내 중간 달성 단위 또는 미션.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "project_id",
+          "type": "uuid",
+          "fk": "projects.id",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "importance",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "difficulty",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "status",
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": "todo"
+        },
+        {
+          "name": "progress",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": 0
+        },
+        {
+          "name": "quest_type",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "project_id",
+        "status",
+        "importance",
+        "due_date"
+      ]
+    },
+    {
+      "name": "quest_relations",
+      "description": "Quest Board를 위한 퀘스트 간 관계.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "source_quest_id",
+          "type": "uuid",
+          "fk": "quests.id",
+          "nullable": false
+        },
+        {
+          "name": "target_quest_id",
+          "type": "uuid",
+          "fk": "quests.id",
+          "nullable": false
+        },
+        {
+          "name": "relation_type",
+          "type": "varchar(30)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "source_quest_id",
+        "target_quest_id",
+        "relation_type"
+      ]
+    },
+    {
+      "name": "todos",
+      "description": "실행 가능한 가장 작은 행동 단위. quest_id/project_id는 nullable.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "quest_id",
+          "type": "uuid",
+          "fk": "quests.id",
+          "nullable": true
+        },
+        {
+          "name": "project_id",
+          "type": "uuid",
+          "fk": "projects.id",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": "todo"
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "quest_id",
+        "project_id",
+        "status",
+        "priority",
+        "due_date"
+      ]
+    },
+    {
+      "name": "status_logs",
+      "description": "사용자의 상태 기록. MVP에서는 유연한 key-value 로그로 사용한다.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "status_type",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "value",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "numeric_value",
+          "type": "numeric(10,2)",
+          "nullable": true
+        },
+        {
+          "name": "unit",
+          "type": "varchar(30)",
+          "nullable": true
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "status_type",
+        "recorded_at"
+      ]
+    },
+    {
+      "name": "calendar_events",
+      "description": "다가오는 일정 및 캘린더 이벤트.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "start_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "end_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "location",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "related_project_id",
+          "type": "uuid",
+          "fk": "projects.id",
+          "nullable": true
+        },
+        {
+          "name": "related_quest_id",
+          "type": "uuid",
+          "fk": "quests.id",
+          "nullable": true
+        },
+        {
+          "name": "priority",
+          "type": "smallint",
+          "nullable": false,
+          "default": 3
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "start_at",
+        "priority",
+        "related_project_id"
+      ]
+    },
+    {
+      "name": "body_profiles",
+      "description": "사용자의 기본 신체 프로필 스냅샷. 가장 최신 record를 My Status에서 사용한다.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "age",
+          "type": "smallint",
+          "nullable": true
+        },
+        {
+          "name": "gender",
+          "type": "varchar(30)",
+          "nullable": true
+        },
+        {
+          "name": "height_cm",
+          "type": "numeric(5,2)",
+          "nullable": true
+        },
+        {
+          "name": "weight_kg",
+          "type": "numeric(5,2)",
+          "nullable": true
+        },
+        {
+          "name": "body_fat_percentage",
+          "type": "numeric(5,2)",
+          "nullable": true
+        },
+        {
+          "name": "basal_metabolic_rate",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "recorded_at"
+      ]
+    },
+    {
+      "name": "body_part_statuses",
+      "description": "부위별 상태. My Status 아바타/신체 프로필과 연결된다.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "pk": true,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "fk": "users.id",
+          "nullable": false
+        },
+        {
+          "name": "body_part",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": "unknown"
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "last_checked_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        "user_id",
+        "body_part",
+        "status"
+      ]
+    }
+  ],
+  "planned_v0_3_tables": [
+    {
+      "name": "health_check_logs",
+      "purpose": "검진, 통증, 병원 방문, 건강 체크 기록"
+    },
+    {
+      "name": "exercise_logs",
+      "purpose": "운동 기록"
+    },
+    {
+      "name": "meal_logs",
+      "purpose": "식단 기록"
+    },
+    {
+      "name": "water_logs",
+      "purpose": "물 섭취 기록"
+    }
+  ],
+  "enums": {
+    "common_status": [
+      "active",
+      "paused",
+      "completed",
+      "archived"
+    ],
+    "todo_status": [
+      "todo",
+      "in_progress",
+      "done",
+      "cancelled"
+    ],
+    "quest_status": [
+      "todo",
+      "in_progress",
+      "done",
+      "blocked",
+      "cancelled"
+    ],
+    "relation_type": [
+      "prerequisite",
+      "related",
+      "blocked_by",
+      "parent_child"
+    ],
+    "body_part_status": [
+      "normal",
+      "tired",
+      "watch",
+      "needs_care",
+      "pain",
+      "unknown"
+    ],
+    "event_type": [
+      "work",
+      "health",
+      "personal",
+      "project",
+      "social",
+      "other"
+    ],
+    "priority_scale": "1=highest, 5=lowest"
+  }
+}

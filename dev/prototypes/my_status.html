@@ -1,0 +1,2069 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LifeGame - My Status Prototype</title>
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: #ffffff;
+      --line: #dce7f8;
+      --line-soft: #edf3fb;
+      --text: #15264a;
+      --muted: #637394;
+      --blue: #246bff;
+      --blue-dark: #174fd1;
+      --blue-soft: #eaf2ff;
+      --green: #2ba76b;
+      --green-soft: #eaf8f1;
+      --orange: #eb8b31;
+      --orange-soft: #fff1e3;
+      --red: #d74e54;
+      --red-soft: #ffecef;
+      --shadow: 0 16px 45px rgba(41, 77, 130, 0.12);
+      --radius: 18px;
+      --button: #246bff;
+      --panel-color: rgba(255, 255, 255, 0.92);
+      --dashboard-panel-height: clamp(640px, calc(100vh - 108px), 960px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(90, 150, 255, 0.2), transparent 32rem),
+        linear-gradient(135deg, #f8fbff 0%, var(--bg) 45%, #eef5ff 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(1840px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 8px 0 14px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      min-height: 76px;
+      padding: 0 28px;
+      border: 1px solid var(--line);
+      border-radius: 0 0 18px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 250px;
+      color: #114fc5;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: var(--blue);
+    }
+
+    .nav {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      flex: 1;
+      height: 76px;
+    }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      color: #5d6a89;
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav a.active {
+      color: #143c92;
+      border-color: var(--blue);
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      color: #3c5994;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f9fbff;
+    }
+
+    .icon-button.active {
+      color: #ffffff;
+      border-color: var(--button);
+      background: var(--button);
+      box-shadow: 0 10px 22px rgba(36, 107, 255, 0.24);
+    }
+
+    .profile-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px 6px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #ffffff;
+    }
+
+    .profile-face {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 34%, #263a62 0 18%, transparent 19%),
+        radial-gradient(circle at 50% 62%, #315188 0 26%, transparent 27%),
+        linear-gradient(150deg, #d9e8ff, #789cf2);
+      box-shadow: inset 0 0 0 2px #ffffff;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .quest-column {
+      display: none !important;
+    }
+
+    .widget-column {
+      grid-column: span 2;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-color);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-pad {
+      padding: 20px;
+    }
+
+    .widget-panel {
+      position: relative;
+      height: var(--dashboard-panel-height);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-weight: 800;
+    }
+
+    .title-row svg {
+      flex: 0 0 auto;
+      color: var(--blue);
+    }
+
+    .panel-link {
+      color: #5d719b;
+      font-size: 13px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .avatar-panel {
+      display: flex;
+      flex-direction: column;
+      height: var(--dashboard-panel-height);
+      padding: 22px;
+      position: relative;
+    }
+
+    .avatar-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      flex: 1 1 auto;
+      min-height: 0;
+      margin: 4px 0 18px;
+      overflow: hidden;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at center, rgba(36, 107, 255, 0.11) 0 2px, transparent 3px),
+        radial-gradient(circle at center, transparent 0 22%, rgba(36, 107, 255, 0.08) 22.4% 22.8%, transparent 23.3% 32%, rgba(36, 107, 255, 0.07) 32.4% 32.8%, transparent 33.3% 43%, rgba(36, 107, 255, 0.06) 43.4% 43.8%, transparent 44.3%),
+        linear-gradient(180deg, #fbfdff, #f3f8ff);
+      background-size: 68px 68px, 100% 100%, 100% 100%;
+    }
+
+    .avatar-stage::before,
+    .avatar-stage::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(36, 107, 255, 0.08);
+      transform: rotate(24deg);
+    }
+
+    .avatar-stage::after {
+      transform: rotate(-24deg);
+    }
+
+    .avatar-geometry {
+      position: absolute;
+      inset: -4%;
+      z-index: 0;
+      width: 108%;
+      height: 108%;
+      color: rgba(0, 116, 180, 0.44);
+      pointer-events: none;
+    }
+
+    .avatar-stats {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 2;
+      display: grid;
+      gap: 8px;
+      width: max-content;
+    }
+
+    .stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 0 10px;
+      color: #15376e;
+      border: 1px solid rgba(93, 141, 212, 0.22);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 8px 20px rgba(41, 77, 130, 0.08);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .stat-chip svg {
+      color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .avatar-image {
+      position: relative;
+      z-index: 1;
+      width: min(135%, 650px);
+      max-height: 138%;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.35));
+    }
+
+    .metric-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric-row,
+    .condition-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .metric-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #37517f;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .metric-value {
+      color: #102653;
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .condition-card {
+      align-items: flex-start;
+      margin-top: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffffff, #f2f7ff);
+    }
+
+    .condition-score {
+      color: var(--blue);
+      font-size: 28px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .quest-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quest-card {
+      display: grid;
+      grid-template-columns: 34px 84px 1fr 108px 116px;
+      align-items: center;
+      gap: 16px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-strong);
+    }
+
+    .rank {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      color: white;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #4d94ff, var(--blue));
+      font-weight: 800;
+    }
+
+    .quest-icon {
+      display: grid;
+      place-items: center;
+      width: 78px;
+      height: 64px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #f7fbff, #edf4ff);
+      color: var(--blue);
+    }
+
+    .quest-main {
+      min-width: 0;
+    }
+
+    .quest-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 23px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pill.blue {
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      border: 1px solid #cfe0ff;
+    }
+
+    .pill.green {
+      color: #21784e;
+      background: var(--green-soft);
+      border: 1px solid #c8ead8;
+    }
+
+    .pill.orange {
+      color: #ad5e18;
+      background: var(--orange-soft);
+      border: 1px solid #ffd5a9;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, max-content));
+      gap: 8px 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-grid strong {
+      color: #31466e;
+      font-weight: 750;
+    }
+
+    .check-box {
+      justify-self: center;
+      width: 28px;
+      height: 28px;
+      border: 2px solid #b7c8e9;
+      border-radius: 7px;
+      background: #f9fbff;
+    }
+
+    .primary-button {
+      height: 38px;
+      color: white;
+      border-radius: 8px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--button), white 18%), color-mix(in srgb, var(--button), black 12%));
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(36, 107, 255, 0.22);
+    }
+
+    .project-row {
+      display: grid;
+      grid-template-columns: 52px 1fr 118px 86px;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-strong);
+    }
+
+    .project-badge {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid #cfe0ff;
+      color: var(--blue);
+      background: #f8fbff;
+    }
+
+    .project-name {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-weight: 850;
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8eef8;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), #6ca7ff);
+    }
+
+    .date-box {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .date-box strong {
+      display: block;
+      margin-top: 4px;
+      color: #283c64;
+      font-size: 14px;
+    }
+
+    .todo-project {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-strong);
+    }
+
+    .todo-project-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 850;
+    }
+
+    .todo-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .todo-list li {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #5e6f91;
+      font-size: 14px;
+    }
+
+    .mini-check {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #b8c9e7;
+      border-radius: 5px;
+      background: #ffffff;
+    }
+
+    .mini-check.done {
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      border-color: #92b2ef;
+      background: #8fb4f6;
+    }
+
+    .widget-board-title {
+      min-width: 0;
+    }
+
+    .widget-board-title h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .widget-board-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .add-menu {
+      position: fixed;
+      left: var(--menu-x, 50%);
+      top: var(--menu-y, 50%);
+      z-index: 30;
+    }
+
+    .menu-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      display: none;
+      width: 210px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .add-menu.open .menu-panel {
+      display: grid;
+      gap: 5px;
+    }
+
+    .menu-panel button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 34px;
+      padding: 0 10px;
+      color: #31466e;
+      border-radius: 8px;
+      background: transparent;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .menu-panel button:hover {
+      background: #f2f6ff;
+    }
+
+    .widget-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: repeat(8, minmax(0, 1fr));
+      grid-auto-rows: minmax(0, 1fr);
+      gap: 10px;
+      min-height: 0;
+      height: 100%;
+      padding: 2px;
+      background:
+        linear-gradient(rgba(36, 107, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 107, 255, 0.045) 1px, transparent 1px);
+      background-size: calc((100% - 50px) / 6 + 10px) calc((100% - 70px) / 8 + 10px);
+      border-radius: 14px;
+    }
+
+    .widget {
+      position: relative;
+      z-index: 2;
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-strong);
+      overflow: hidden;
+    }
+
+    body.editing .widget {
+      cursor: grab;
+    }
+
+    body.editing .widget.dragging {
+      cursor: grabbing;
+      outline: 2px solid rgba(36, 107, 255, 0.42);
+      box-shadow: 0 18px 38px rgba(36, 107, 255, 0.18);
+      user-select: none;
+    }
+
+    .widget[data-size="2x2"] {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    .widget[data-size="3x2"] {
+      grid-column: span 3;
+      grid-row: span 2;
+    }
+
+    .widget[data-size="3x3"] {
+      grid-column: span 3;
+      grid-row: span 3;
+    }
+
+    .widget[data-size="6x2"] {
+      grid-column: span 6;
+      grid-row: span 2;
+    }
+
+    .widget[data-size="4x2"] {
+      grid-column: span 4;
+      grid-row: span 2;
+    }
+
+    .widget[data-size="4x3"] {
+      grid-column: span 4;
+      grid-row: span 3;
+    }
+
+    .widget[data-size="2x4"] {
+      grid-column: span 2;
+      grid-row: span 4;
+    }
+
+    .widget.hidden {
+      display: none;
+    }
+
+    .widget.wide {
+      grid-column: span 6;
+    }
+
+    .widget-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 15px 10px;
+    }
+
+    .widget-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      font-weight: 850;
+    }
+
+    .widget-actions {
+      display: none;
+      align-items: center;
+      gap: 5px;
+    }
+
+    body.editing .widget-actions {
+      display: flex;
+    }
+
+    .tiny-button {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      color: #6b7da0;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .tiny-button:hover {
+      color: #143c92;
+      border-color: var(--line);
+      background: #f5f8ff;
+    }
+
+    .widget-body {
+      padding: 0 15px 15px;
+    }
+
+    .resize-handle {
+      position: absolute;
+      display: none;
+      right: 7px;
+      bottom: 7px;
+      z-index: 3;
+      width: 18px;
+      height: 18px;
+      border-right: 2px solid rgba(36, 107, 255, 0.45);
+      border-bottom: 2px solid rgba(36, 107, 255, 0.45);
+      cursor: nwse-resize;
+      border-radius: 2px;
+    }
+
+    body.editing .resize-handle {
+      display: block;
+    }
+
+    .widget.resizing {
+      outline: 2px solid rgba(36, 107, 255, 0.42);
+      box-shadow: 0 18px 38px rgba(36, 107, 255, 0.18);
+      user-select: none;
+    }
+
+    .widget-short {
+      display: none;
+    }
+
+    .widget[data-compact="true"] .widget-head {
+      height: 100%;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .widget[data-compact="true"] .widget-title {
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .widget[data-compact="true"] .widget-full,
+    .widget[data-compact="true"] .widget-body {
+      display: none;
+    }
+
+    .widget[data-compact="true"] .widget-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+
+    body.editing .widget[data-compact="true"] .widget-actions {
+      display: flex;
+    }
+
+    .widget[data-compact="true"] .widget-short {
+      display: inline;
+    }
+
+    .empty-grid-layer {
+      position: absolute;
+      inset: 2px;
+      z-index: 1;
+      display: none;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: repeat(8, minmax(0, 1fr));
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    body.editing .empty-grid-layer {
+      display: grid;
+    }
+
+    .empty-grid-plus {
+      display: grid;
+      place-items: center;
+      color: rgba(36, 107, 255, 0.42);
+      border: 1px dashed rgba(36, 107, 255, 0.18);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.24);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .empty-grid-plus svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .empty-grid-plus.occupied {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .event-item,
+    .deadline-item {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .event-date {
+      display: grid;
+      place-items: center;
+      min-height: 54px;
+      border-radius: 12px;
+      color: var(--blue);
+      background: #f4f8ff;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .event-date small {
+      color: #3661aa;
+      font-size: 12px;
+    }
+
+    .item-main strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .item-main span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .deadline-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 28px;
+      padding: 0 9px;
+      color: #164fca;
+      border: 1px solid #cfe0ff;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .habit-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .habit {
+      display: grid;
+      gap: 10px;
+      min-height: 104px;
+      padding: 13px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #ffffff, #f7fbff);
+    }
+
+    .habit-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 850;
+    }
+
+    .streak {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .habit p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .habit-track {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      align-items: end;
+    }
+
+    .habit-track span {
+      height: 8px;
+      border-radius: 999px;
+      background: #dce8fb;
+    }
+
+    .habit-track span.on {
+      background: var(--blue);
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 11px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .status-row strong {
+      font-size: 13px;
+    }
+
+    .status-row .bar {
+      margin-top: 8px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .settings-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      background: rgba(15, 28, 54, 0.28);
+      backdrop-filter: blur(5px);
+    }
+
+    .settings-backdrop.open {
+      display: block;
+    }
+
+    .settings-panel {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 21;
+      display: none;
+      width: min(440px, calc(100% - 36px));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 24px 70px rgba(21, 38, 74, 0.22);
+      overflow: hidden;
+    }
+
+    .settings-panel.open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .settings-head h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line-soft);
+      overflow-x: auto;
+    }
+
+    .settings-tab {
+      height: 34px;
+      padding: 0 13px;
+      color: #5f708f;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      font-size: 13px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .settings-tab.active {
+      color: #ffffff;
+      border-color: var(--button);
+      background: var(--button);
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .settings-section {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .settings-section h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .preset-card {
+      display: grid;
+      gap: 9px;
+      min-height: 92px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fbff;
+      text-align: left;
+    }
+
+    .preset-card strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .preset-swatches {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-swatches span {
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(21, 38, 74, 0.14);
+      border-radius: 50%;
+    }
+
+    .color-control {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+    }
+
+    .color-control label {
+      display: grid;
+      gap: 4px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .color-control span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .color-control input {
+      width: 44px;
+      height: 34px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+      @media (max-width: 1360px) {
+      .dashboard {
+        grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.05fr) minmax(260px, 0.85fr);
+      }
+
+      .widget-column {
+        grid-column: span 2;
+      }
+
+      .widget-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+      .widget.wide {
+        grid-column: span 6;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .app-shell {
+        width: min(100% - 20px, 760px);
+      }
+
+      .topbar {
+        flex-wrap: wrap;
+        min-height: auto;
+        padding: 16px;
+      }
+
+      .brand {
+        min-width: auto;
+        flex: 1;
+      }
+
+      .nav {
+        order: 3;
+        width: 100%;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .nav a {
+        min-height: 42px;
+        padding: 0 12px;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .widget-column {
+        grid-column: auto;
+      }
+
+      .avatar-panel {
+        min-height: 0;
+      }
+
+      .avatar-stage {
+        min-height: 460px;
+      }
+
+      .quest-card,
+      .project-row {
+        grid-template-columns: 1fr;
+      }
+
+      .quest-card {
+        position: relative;
+        padding-left: 58px;
+      }
+
+      .rank {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+      }
+
+      .quest-icon,
+      .check-box,
+      .primary-button {
+        justify-self: start;
+      }
+
+      .primary-button {
+        width: 128px;
+      }
+
+      .widget-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+    }
+
+    @media (max-width: 640px) {
+      .app-shell {
+        width: min(100% - 14px, 480px);
+        padding-top: 8px;
+      }
+
+      .topbar {
+        border-radius: 14px;
+      }
+
+      .brand {
+        font-size: 22px;
+      }
+
+      .top-actions .icon-button {
+        display: none;
+      }
+
+      .panel-pad,
+      .avatar-panel {
+        padding: 15px;
+      }
+
+      .menu-panel {
+        width: 210px;
+      }
+
+      .widget-grid,
+      .habit-list {
+        grid-template-columns: 1fr;
+      }
+
+      .widget-grid {
+        grid-auto-rows: auto;
+        min-height: 0;
+      }
+
+      .widget,
+      .widget[data-size],
+      .widget.wide {
+        grid-column: auto;
+        grid-row: auto;
+      }
+
+      .widget.wide {
+        grid-column: span 1;
+      }
+
+      .event-item,
+      .deadline-item {
+        grid-template-columns: 50px 1fr;
+      }
+
+      .deadline-count {
+        grid-column: 2;
+        justify-self: start;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="LifeGame">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <circle cx="21" cy="21" r="17" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M21 2.5v37M2.5 21h37M8.8 8.8l24.4 24.4M33.2 8.8 8.8 33.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <path d="m21 6 4.5 15L21 36 16.5 21 21 6Z" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+        </span>
+        LifeGame
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a class="active" href="#">My Status</a>
+        <a href="#">Life Goals</a>
+        <a href="#">Life To Do</a>
+        <a href="#">Quest Board</a>
+        <a href="#">Projects</a>
+        <a href="#">Settings</a>
+      </nav>
+      <div class="top-actions">
+        <button class="icon-button" type="button" aria-label="위젯 편집 모드" aria-pressed="false" title="위젯 편집 모드" data-toggle-edit>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" aria-label="settings" data-open-settings>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2.1 2.1 0 0 1-2.98 2.98l-.05-.05a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.1 1.66V21.4a2.1 2.1 0 0 1-4.2 0v-.08a1.8 1.8 0 0 0-1.1-1.66 1.8 1.8 0 0 0-1.98.36l-.05.05a2.1 2.1 0 0 1-2.98-2.98l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.66-1.1H2.9a2.1 2.1 0 0 1 0-4.2h.08A1.8 1.8 0 0 0 4.64 8.6a1.8 1.8 0 0 0-.36-1.98l-.05-.05a2.1 2.1 0 1 1 2.98-2.98l.05.05A1.8 1.8 0 0 0 9.24 4a1.8 1.8 0 0 0 1.1-1.66V2.3a2.1 2.1 0 0 1 4.2 0v.08A1.8 1.8 0 0 0 15.64 4a1.8 1.8 0 0 0 1.98-.36l.05-.05a2.1 2.1 0 1 1 2.98 2.98l-.05.05A1.8 1.8 0 0 0 19.4 8.6a1.8 1.8 0 0 0 1.66 1.1h.08a2.1 2.1 0 0 1 0 4.2h-.08A1.8 1.8 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" aria-label="notifications">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 9.4c0-3.3-2.1-5.7-5.1-6.2V2h-1.8v1.2C8.1 3.7 6 6.1 6 9.4v3.7l-1.8 3.2h15.6L18 13.1V9.4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M9.5 18.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="profile-chip" type="button" aria-label="profile">
+          <span class="profile-face" aria-hidden="true"></span>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="m5 7.5 5 5 5-5" stroke="#315188" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <aside class="panel avatar-panel" aria-label="고경태님 안녕하세요.">
+        <div class="panel-header">
+          <div class="title-row">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+            고경태님 안녕하세요.
+          </div>
+        </div>
+        <div class="avatar-stage" aria-label="아바타 상태">
+          <svg class="avatar-geometry" viewBox="0 0 420 420" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="1.1" opacity=".7">
+              <circle cx="210" cy="210" r="154"/>
+              <circle cx="210" cy="210" r="128" opacity=".7"/>
+              <ellipse cx="210" cy="210" rx="176" ry="136" opacity=".45"/>
+              <ellipse cx="210" cy="210" rx="136" ry="176" opacity=".45"/>
+              <rect x="72" y="58" width="276" height="304" opacity=".48"/>
+              <path d="M72 362 210 58l138 304H72Z" opacity=".42"/>
+              <path d="M72 58 348 362M348 58 72 362M210 32v356M42 210h336" opacity=".38"/>
+              <path d="M72 150c78-42 198-42 276 0M72 270c78 42 198 42 276 0" opacity=".38"/>
+            </g>
+            <g fill="currentColor" opacity=".72">
+              <circle cx="210" cy="32" r="3.2"/>
+              <circle cx="210" cy="388" r="3.2"/>
+              <circle cx="42" cy="210" r="3.2"/>
+              <circle cx="378" cy="210" r="3.2"/>
+              <circle cx="72" cy="58" r="3.2"/>
+              <circle cx="348" cy="58" r="3.2"/>
+              <circle cx="72" cy="362" r="3.2"/>
+              <circle cx="348" cy="362" r="3.2"/>
+              <circle cx="110" cy="126" r="2.4"/>
+              <circle cx="310" cy="126" r="2.4"/>
+              <circle cx="110" cy="294" r="2.4"/>
+              <circle cx="310" cy="294" r="2.4"/>
+            </g>
+          </svg>
+          <div class="avatar-stats" aria-label="신체 수치">
+            <div class="stat-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.5 12h-9L6 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              72kg
+            </div>
+            <div class="stat-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 21V8M7 8 4.5 10.5M7 8l2.5 2.5M17 3v13M17 16l-2.5-2.5M17 16l2.5-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              178cm
+            </div>
+            <div class="stat-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12a7 7 0 0 1 14 0v1a7 7 0 0 1-14 0v-1Z" stroke="currentColor" stroke-width="2"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              118/76
+            </div>
+          </div>
+          <img class="avatar-image" src="../../sample_images/bw_removed_3.png" alt="푸른 인체 실루엣 아바타">
+        </div>
+        <div class="condition-card">
+          <div>
+            <div class="metric-label">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 8.8c0 6.2-8.5 11.2-8.5 11.2S3.5 15 3.5 8.8A4.8 4.8 0 0 1 12 5.7a4.8 4.8 0 0 1 8.5 3.1Z" stroke="#246bff" stroke-width="1.9"/><path d="M7.5 12h2l1.2-2.4 2.2 5.2 1.5-2.8h2.1" stroke="#246bff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              컨디션 요약
+            </div>
+            <div style="margin-top: 6px; color: var(--muted); font-size: 13px;">좋은 흐름을 유지하고 있어요.</div>
+          </div>
+          <div class="condition-score">76<span class="unit">/100</span></div>
+        </div>
+      </aside>
+
+      <section class="stack widget-column">
+        <section class="panel panel-pad widget-panel" aria-label="위젯 보드">
+          <div class="widget-grid" data-widget-grid>
+              <div class="empty-grid-layer" data-empty-grid-layer></div>
+              <article class="widget" data-widget="schedule" data-size="3x2" data-col="1" data-row="1">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" stroke="#246bff" stroke-width="2"/><path d="M8 3v4M16 3v4M4 10h16" stroke="#246bff" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span class="widget-full">다가오는 일정</span>
+                    <span class="widget-short">일정</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="schedule" aria-label="다가오는 일정 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body">
+                  <div class="event-item">
+                    <div class="event-date">5.10<br><small>토</small></div>
+                    <div class="item-main">
+                      <strong>프로젝트 회의</strong>
+                      <span>10:00 - 11:00 · LifeGame Development</span>
+                    </div>
+                    <span class="deadline-count">내일</span>
+                  </div>
+                  <div class="event-item">
+                    <div class="event-date">5.12<br><small>월</small></div>
+                    <div class="item-main">
+                      <strong>운동 목표 점검</strong>
+                      <span>14:00 - 15:00 · 건강한 삶</span>
+                    </div>
+                    <span class="deadline-count">D-2</span>
+                  </div>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+              <article class="widget" data-widget="deadlines" data-size="3x2" data-col="4" data-row="1">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4h12v16H6V4Z" stroke="#246bff" stroke-width="2"/><path d="M9 8h6M9 12h6M9 16h3" stroke="#246bff" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span class="widget-full">다가오는 마감기한</span>
+                    <span class="widget-short">마감</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="deadlines" aria-label="다가오는 마감기한 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body">
+                  <div class="deadline-item">
+                    <div class="event-date">6.20<br><small>금</small></div>
+                    <div class="item-main">
+                      <strong>My Status API 설계</strong>
+                      <span>LifeGame Development</span>
+                    </div>
+                    <span class="deadline-count">D-6</span>
+                  </div>
+                  <div class="deadline-item">
+                    <div class="event-date">6.30<br><small>월</small></div>
+                    <div class="item-main">
+                      <strong>프로토타입 리뷰</strong>
+                      <span>Product Design</span>
+                    </div>
+                    <span class="deadline-count">D-16</span>
+                  </div>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+              <article class="widget" data-widget="water" data-size="2x2" data-col="1" data-row="3" data-compact="true">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3s6 7.2 6 12a6 6 0 1 1-12 0c0-4.8 6-12 6-12Z" stroke="#246bff" stroke-width="2" stroke-linejoin="round"/></svg>
+                    <span class="widget-full">물 많이 마시기</span>
+                    <span class="widget-short">물</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="water" aria-label="물 위젯 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body">
+                  <strong>물 많이 마시기</strong>
+                  <p>오늘 1.8L 목표</p>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+              <article class="widget" data-widget="sugar" data-size="2x2" data-col="3" data-row="3" data-compact="true">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 8 3-3h4l3 3-3 3h-4L7 8Z" stroke="#246bff" stroke-width="2" stroke-linejoin="round"/><path d="M10 11 7 16l3 3h4l3-3-3-5" stroke="#246bff" stroke-width="2" stroke-linejoin="round"/></svg>
+                    <span class="widget-full">단것 참기</span>
+                    <span class="widget-short">당</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="sugar" aria-label="단것 참기 위젯 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body">
+                  <strong>단것 참기</strong>
+                  <p>식후 디저트 대체</p>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+              <article class="widget wide" data-widget="habits" data-size="2x4" data-col="5" data-row="3">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13.5 9 17 19 6" stroke="#246bff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 5h9M4 9h6M4 19h16" stroke="#246bff" stroke-width="2" stroke-linecap="round" opacity=".45"/></svg>
+                    <span class="widget-full">지키고 싶은 룰 / 만들고 싶은 습관</span>
+                    <span class="widget-short">습관</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="habits" aria-label="습관 위젯 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body">
+                  <div class="habit-list">
+                    <article class="habit">
+                      <div class="habit-top"><span>물 많이 마시기</span><span class="streak">4일째</span></div>
+                      <p>하루 1.8L 이상. 오후 6시 전에 대부분 채우기.</p>
+                      <div class="habit-track" aria-hidden="true"><span class="on"></span><span class="on"></span><span></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+                    </article>
+                    <article class="habit">
+                      <div class="habit-top"><span>단것 참기</span><span class="streak">2일째</span></div>
+                      <p>식후 디저트 대신 차나 과일로 대체하기.</p>
+                      <div class="habit-track" aria-hidden="true"><span></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div>
+                    </article>
+                    <article class="habit">
+                      <div class="habit-top"><span>수면 시간 지키기</span><span class="streak">6일째</span></div>
+                      <p>새벽 작업을 줄이고 7시간 이상 수면 확보.</p>
+                      <div class="habit-track" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span class="on"></span><span></span></div>
+                    </article>
+                    <article class="habit">
+                      <div class="habit-top"><span>하루 한 번 기록</span><span class="streak">9일째</span></div>
+                      <p>컨디션과 핵심 행동을 짧게 남기기.</p>
+                      <div class="habit-track" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div>
+                    </article>
+                  </div>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+              <article class="widget wide" data-widget="projects" data-size="4x2" data-col="1" data-row="5">
+                <div class="widget-head">
+                  <div class="widget-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18V6M4 18h16M8 15V9M12 15V5M16 15v-4" stroke="#246bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="widget-full">진행 프로젝트 상태</span>
+                    <span class="widget-short">프로젝트</span>
+                  </div>
+                  <div class="widget-actions">
+                    <button class="tiny-button" type="button" data-hide-widget="projects" aria-label="프로젝트 상태 위젯 숨기기">×</button>
+                  </div>
+                </div>
+                <div class="widget-body status-grid">
+                  <div class="status-row">
+                    <div>
+                      <strong>LifeGame Development</strong>
+                      <div class="bar"><span style="width: 68%;"></span></div>
+                    </div>
+                    <span class="pill blue">68%</span>
+                  </div>
+                  <div class="status-row">
+                    <div>
+                      <strong>Investment Portfolio</strong>
+                      <div class="bar"><span style="width: 55%;"></span></div>
+                    </div>
+                    <span class="pill orange">55%</span>
+                  </div>
+                  <div class="status-row">
+                    <div>
+                      <strong>건강한 삶</strong>
+                      <div class="bar"><span style="width: 42%;"></span></div>
+                    </div>
+                    <span class="pill green">42%</span>
+                  </div>
+                </div>
+                <span class="resize-handle" data-resize-handle aria-hidden="true"></span>
+              </article>
+
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="add-menu" data-add-menu>
+    <div class="menu-panel" aria-label="위젯 추가 메뉴">
+      <button type="button" data-show-widget="schedule">다가오는 일정 <span>+</span></button>
+      <button type="button" data-show-widget="deadlines">다가오는 마감기한 <span>+</span></button>
+      <button type="button" data-show-widget="water">물 많이 마시기 <span>+</span></button>
+      <button type="button" data-show-widget="sugar">단것 참기 <span>+</span></button>
+      <button type="button" data-show-widget="habits">룰/습관 리스트 <span>+</span></button>
+      <button type="button" data-show-widget="projects">진행 프로젝트 상태 <span>+</span></button>
+    </div>
+  </div>
+
+  <div class="settings-backdrop" data-settings-backdrop></div>
+  <aside class="settings-panel" data-settings-panel aria-label="설정 패널">
+    <div class="settings-head">
+      <h2>설정</h2>
+      <button class="icon-button" type="button" aria-label="설정 닫기" data-close-settings>×</button>
+    </div>
+    <div class="settings-tabs" role="tablist" aria-label="설정 탭">
+      <button class="settings-tab active" type="button" role="tab" aria-selected="true">테마</button>
+      <button class="settings-tab" type="button" role="tab" aria-selected="false" disabled>레이아웃</button>
+      <button class="settings-tab" type="button" role="tab" aria-selected="false" disabled>알림</button>
+    </div>
+    <div class="settings-content">
+      <section class="settings-section">
+        <h3>추천 기본 세팅</h3>
+        <div class="preset-grid">
+          <button class="preset-card" type="button" data-theme-preset="clear">
+            <strong>Clear Blue</strong>
+            <div class="preset-swatches"><span style="background:#f4f8ff"></span><span style="background:#246bff"></span><span style="background:#ffffff"></span><span style="background:#15264a"></span></div>
+          </button>
+          <button class="preset-card" type="button" data-theme-preset="mint">
+            <strong>Mint Focus</strong>
+            <div class="preset-swatches"><span style="background:#f3fbf7"></span><span style="background:#17a36b"></span><span style="background:#ffffff"></span><span style="background:#12342d"></span></div>
+          </button>
+          <button class="preset-card" type="button" data-theme-preset="mono">
+            <strong>Soft Mono</strong>
+            <div class="preset-swatches"><span style="background:#f6f7f9"></span><span style="background:#4b6b8f"></span><span style="background:#ffffff"></span><span style="background:#1f2937"></span></div>
+          </button>
+          <button class="preset-card" type="button" data-theme-preset="warm">
+            <strong>Warm Light</strong>
+            <div class="preset-swatches"><span style="background:#fbf7f1"></span><span style="background:#d97735"></span><span style="background:#fffefd"></span><span style="background:#34251b"></span></div>
+          </button>
+        </div>
+      </section>
+      <section class="settings-section">
+        <h3>직접 조절</h3>
+        <div class="color-control">
+          <label for="theme-bg">배경색 <span>페이지 전체 배경</span></label>
+          <input id="theme-bg" type="color" value="#f4f8ff" data-theme-var="--bg">
+        </div>
+        <div class="color-control">
+          <label for="theme-button">버튼색 <span>주요 버튼과 선택 상태</span></label>
+          <input id="theme-button" type="color" value="#246bff" data-theme-var="--button">
+        </div>
+        <div class="color-control">
+          <label for="theme-panel">패널색 <span>카드와 위젯 배경</span></label>
+          <input id="theme-panel" type="color" value="#ffffff" data-theme-var="--panel-color">
+        </div>
+        <div class="color-control">
+          <label for="theme-text">글자색 <span>기본 본문 텍스트</span></label>
+          <input id="theme-text" type="color" value="#15264a" data-theme-var="--text">
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <script>
+    const addMenu = document.querySelector("[data-add-menu]");
+    const emptyGridLayer = document.querySelector("[data-empty-grid-layer]");
+    const editToggleButton = document.querySelector("[data-toggle-edit]");
+    let isEditing = false;
+    let selectedEmptyCell = null;
+
+    function setEditMode(nextValue) {
+      isEditing = nextValue;
+      document.body.classList.toggle("editing", isEditing);
+      editToggleButton.classList.toggle("active", isEditing);
+      editToggleButton.setAttribute("aria-pressed", String(isEditing));
+      if (!isEditing) {
+        addMenu.classList.remove("open");
+        selectedEmptyCell = null;
+      }
+      updateEmptyCells();
+    }
+
+    editToggleButton.addEventListener("click", () => {
+      setEditMode(!isEditing);
+    });
+
+    function openAddMenuAt(x, y) {
+      if (!isEditing) {
+        return;
+      }
+      const menuWidth = 210;
+      const menuHeight = 230;
+      const left = Math.min(x, window.innerWidth - menuWidth - 12);
+      const top = Math.min(y, window.innerHeight - menuHeight - 12);
+      addMenu.style.setProperty("--menu-x", `${Math.max(12, left)}px`);
+      addMenu.style.setProperty("--menu-y", `${Math.max(12, top)}px`);
+      addMenu.classList.add("open");
+    }
+
+    for (let index = 0; index < 48; index += 1) {
+      const button = document.createElement("button");
+      const col = index % 6 + 1;
+      const row = Math.floor(index / 6) + 1;
+      button.className = "empty-grid-plus";
+      button.type = "button";
+      button.dataset.col = String(col);
+      button.dataset.row = String(row);
+      button.setAttribute("aria-label", "빈 슬롯에 위젯 추가");
+      button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+      button.addEventListener("click", (event) => {
+        if (!isEditing) {
+          return;
+        }
+        event.stopPropagation();
+        selectedEmptyCell = { col, row };
+        const rect = button.getBoundingClientRect();
+        openAddMenuAt(rect.left, rect.bottom + 8);
+      });
+      emptyGridLayer.appendChild(button);
+    }
+
+    document.addEventListener("click", (event) => {
+      if (!addMenu.contains(event.target)) {
+        addMenu.classList.remove("open");
+      }
+    });
+
+    document.querySelectorAll("[data-hide-widget]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!isEditing) {
+          return;
+        }
+        const name = button.dataset.hideWidget;
+        document.querySelector(`[data-widget="${name}"]`).classList.add("hidden");
+        updateEmptyCells();
+      });
+    });
+
+    document.querySelectorAll("[data-show-widget]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const name = button.dataset.showWidget;
+        const widget = document.querySelector(`[data-widget="${name}"]`);
+        if (!widget.classList.contains("hidden")) {
+          addMenu.classList.remove("open");
+          selectedEmptyCell = null;
+          return;
+        }
+
+        const cols = Number(widget.dataset.cols || 2);
+        const rows = Number(widget.dataset.rows || 2);
+        const startCol = selectedEmptyCell?.col ?? Number(widget.dataset.col || 1);
+        const startRow = selectedEmptyCell?.row ?? Number(widget.dataset.row || 1);
+        const placement = findNearestFreePlacement(widget, startCol, startRow, cols, rows);
+
+        if (placement) {
+          widget.classList.remove("hidden");
+          setWidgetPlacement(widget, placement.col, placement.row, cols, rows);
+        }
+
+        addMenu.classList.remove("open");
+        selectedEmptyCell = null;
+      });
+    });
+
+    const widgetGrid = document.querySelector("[data-widget-grid]");
+
+    function getGridMetrics() {
+      const styles = getComputedStyle(widgetGrid);
+      const gap = parseFloat(styles.columnGap) || 0;
+      const width = widgetGrid.clientWidth;
+      const height = widgetGrid.clientHeight;
+      return {
+        colWidth: (width - gap * 5) / 6,
+        rowHeight: (height - gap * 7) / 8,
+        gap
+      };
+    }
+
+    function normalizePlacement(col, row, cols, rows) {
+      const nextCols = Math.max(1, Math.min(6, cols));
+      const nextRows = Math.max(1, Math.min(8, rows));
+      return {
+        col: Math.max(1, Math.min(7 - nextCols, col)),
+        row: Math.max(1, Math.min(9 - nextRows, row)),
+        cols: nextCols,
+        rows: nextRows
+      };
+    }
+
+    function placementsOverlap(first, second) {
+      return (
+        first.col < second.col + second.cols &&
+        first.col + first.cols > second.col &&
+        first.row < second.row + second.rows &&
+        first.row + first.rows > second.row
+      );
+    }
+
+    function getWidgetPlacement(widget) {
+      return {
+        col: Number(widget.dataset.col || 1),
+        row: Number(widget.dataset.row || 1),
+        cols: Number(widget.dataset.cols || 1),
+        rows: Number(widget.dataset.rows || 1)
+      };
+    }
+
+    function canPlaceWidget(widget, col, row, cols, rows) {
+      const candidate = normalizePlacement(col, row, cols, rows);
+      return !Array.from(document.querySelectorAll("[data-widget]:not(.hidden)")).some((otherWidget) => {
+        return otherWidget !== widget && placementsOverlap(candidate, getWidgetPlacement(otherWidget));
+      });
+    }
+
+    function findNearestFreePlacement(widget, startCol, startRow, cols, rows) {
+      const candidates = [];
+      const normalizedSize = normalizePlacement(1, 1, cols, rows);
+
+      for (let row = 1; row <= 9 - normalizedSize.rows; row += 1) {
+        for (let col = 1; col <= 7 - normalizedSize.cols; col += 1) {
+          candidates.push({
+            col,
+            row,
+            distance: Math.abs(col - startCol) + Math.abs(row - startRow)
+          });
+        }
+      }
+
+      candidates.sort((first, second) => first.distance - second.distance || first.row - second.row || first.col - second.col);
+      return candidates.find(({ col, row }) => canPlaceWidget(widget, col, row, cols, rows)) || null;
+    }
+
+    function updateEmptyCells() {
+      const occupiedCells = new Set();
+
+      document.querySelectorAll("[data-widget]:not(.hidden)").forEach((widget) => {
+        const placement = getWidgetPlacement(widget);
+        for (let row = placement.row; row < placement.row + placement.rows; row += 1) {
+          for (let col = placement.col; col < placement.col + placement.cols; col += 1) {
+            occupiedCells.add(`${col}:${row}`);
+          }
+        }
+      });
+
+      emptyGridLayer.querySelectorAll(".empty-grid-plus").forEach((button) => {
+        const isOccupied = occupiedCells.has(`${button.dataset.col}:${button.dataset.row}`);
+        button.classList.toggle("occupied", isOccupied);
+        button.disabled = isOccupied;
+      });
+    }
+
+    function setWidgetPlacement(widget, col, row, cols, rows) {
+      const placement = normalizePlacement(col, row, cols, rows);
+      widget.style.gridColumn = `${placement.col} / span ${placement.cols}`;
+      widget.style.gridRow = `${placement.row} / span ${placement.rows}`;
+      widget.dataset.col = String(placement.col);
+      widget.dataset.row = String(placement.row);
+      widget.dataset.cols = String(placement.cols);
+      widget.dataset.rows = String(placement.rows);
+      widget.dataset.compact = placement.cols <= 2 && placement.rows <= 2 ? "true" : "false";
+      updateEmptyCells();
+    }
+
+    document.querySelectorAll("[data-size]").forEach((widget) => {
+      const [cols, rows] = widget.dataset.size.split("x").map(Number);
+      const col = Number(widget.dataset.col || 1);
+      const row = Number(widget.dataset.row || 1);
+      setWidgetPlacement(widget, col, row, cols, rows);
+    });
+
+    document.querySelectorAll("[data-resize-handle]").forEach((handle) => {
+      handle.addEventListener("pointerdown", (event) => {
+        if (!isEditing) {
+          return;
+        }
+        event.stopPropagation();
+        const widget = handle.closest("[data-widget]");
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startCol = Number(widget.dataset.col || 1);
+        const startRow = Number(widget.dataset.row || 1);
+        const startCols = Number(widget.dataset.cols || 2);
+        const startRows = Number(widget.dataset.rows || 2);
+        const metrics = getGridMetrics();
+
+        widget.classList.add("resizing");
+        handle.setPointerCapture(event.pointerId);
+
+        function onMove(moveEvent) {
+          const dx = moveEvent.clientX - startX;
+          const dy = moveEvent.clientY - startY;
+          const nextCols = startCols + Math.round(dx / (metrics.colWidth + metrics.gap));
+          const nextRows = startRows + Math.round(dy / (metrics.rowHeight + metrics.gap));
+          const placement = normalizePlacement(startCol, startRow, nextCols, nextRows);
+          if (canPlaceWidget(widget, placement.col, placement.row, placement.cols, placement.rows)) {
+            setWidgetPlacement(widget, placement.col, placement.row, placement.cols, placement.rows);
+          }
+        }
+
+        function onUp() {
+          widget.classList.remove("resizing");
+          handle.removeEventListener("pointermove", onMove);
+          handle.removeEventListener("pointerup", onUp);
+          handle.removeEventListener("pointercancel", onUp);
+        }
+
+        handle.addEventListener("pointermove", onMove);
+        handle.addEventListener("pointerup", onUp);
+        handle.addEventListener("pointercancel", onUp);
+      });
+    });
+
+    document.querySelectorAll("[data-widget]").forEach((widget) => {
+      widget.addEventListener("pointerdown", (event) => {
+        if (!isEditing || event.target.closest("button") || event.target.closest("[data-resize-handle]")) {
+          return;
+        }
+
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startCol = Number(widget.dataset.col || 1);
+        const startRow = Number(widget.dataset.row || 1);
+        const cols = Number(widget.dataset.cols || 2);
+        const rows = Number(widget.dataset.rows || 2);
+        const metrics = getGridMetrics();
+
+        widget.classList.add("dragging");
+        widget.setPointerCapture(event.pointerId);
+
+        function onMove(moveEvent) {
+          const dx = moveEvent.clientX - startX;
+          const dy = moveEvent.clientY - startY;
+          const nextCol = startCol + Math.round(dx / (metrics.colWidth + metrics.gap));
+          const nextRow = startRow + Math.round(dy / (metrics.rowHeight + metrics.gap));
+          const placement = normalizePlacement(nextCol, nextRow, cols, rows);
+          if (canPlaceWidget(widget, placement.col, placement.row, placement.cols, placement.rows)) {
+            setWidgetPlacement(widget, placement.col, placement.row, placement.cols, placement.rows);
+          }
+        }
+
+        function onUp() {
+          widget.classList.remove("dragging");
+          widget.removeEventListener("pointermove", onMove);
+          widget.removeEventListener("pointerup", onUp);
+          widget.removeEventListener("pointercancel", onUp);
+        }
+
+        widget.addEventListener("pointermove", onMove);
+        widget.addEventListener("pointerup", onUp);
+        widget.addEventListener("pointercancel", onUp);
+      });
+    });
+
+    const settingsPanel = document.querySelector("[data-settings-panel]");
+    const settingsBackdrop = document.querySelector("[data-settings-backdrop]");
+    const openSettingsButton = document.querySelector("[data-open-settings]");
+    const closeSettingsButton = document.querySelector("[data-close-settings]");
+    const themeInputs = document.querySelectorAll("[data-theme-var]");
+
+    const presets = {
+      clear: {
+        "--bg": "#f4f8ff",
+        "--button": "#246bff",
+        "--panel-color": "#ffffff",
+        "--text": "#15264a"
+      },
+      mint: {
+        "--bg": "#f3fbf7",
+        "--button": "#17a36b",
+        "--panel-color": "#ffffff",
+        "--text": "#12342d"
+      },
+      mono: {
+        "--bg": "#f6f7f9",
+        "--button": "#4b6b8f",
+        "--panel-color": "#ffffff",
+        "--text": "#1f2937"
+      },
+      warm: {
+        "--bg": "#fbf7f1",
+        "--button": "#d97735",
+        "--panel-color": "#fffefd",
+        "--text": "#34251b"
+      }
+    };
+
+    function setSettingsOpen(isOpen) {
+      settingsPanel.classList.toggle("open", isOpen);
+      settingsBackdrop.classList.toggle("open", isOpen);
+    }
+
+    function setThemeValue(name, value) {
+      document.documentElement.style.setProperty(name, value);
+      if (name === "--button") {
+        document.documentElement.style.setProperty("--blue", value);
+      }
+    }
+
+    openSettingsButton.addEventListener("click", () => setSettingsOpen(true));
+    closeSettingsButton.addEventListener("click", () => setSettingsOpen(false));
+    settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setSettingsOpen(false);
+        addMenu.classList.remove("open");
+      }
+    });
+
+    themeInputs.forEach((input) => {
+      input.addEventListener("input", () => {
+        setThemeValue(input.dataset.themeVar, input.value);
+      });
+    });
+
+    document.querySelectorAll("[data-theme-preset]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const preset = presets[button.dataset.themePreset];
+        Object.entries(preset).forEach(([name, value]) => setThemeValue(name, value));
+        themeInputs.forEach((input) => {
+          input.value = preset[input.dataset.themeVar];
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>

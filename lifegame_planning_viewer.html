@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeGame Planning Viewer v0.2</title>
+<style>
+:root {
+  --bg:#f6f9ff; --panel:#ffffff; --ink:#10213f; --muted:#64748b; --blue:#2563eb;
+  --blue2:#60a5fa; --line:#dbe7ff; --soft:#eef5ff; --green:#10b981; --orange:#f59e0b;
+  --shadow:0 14px 40px rgba(30,64,175,.10);
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:var(--ink);
+  background: radial-gradient(circle at 20% 0%, #e7f0ff 0%, transparent 35%), var(--bg); }
+header { position:sticky; top:0; z-index:3; background:rgba(255,255,255,.82); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); }
+.header-inner { max-width:1280px; margin:0 auto; padding:18px 28px; display:flex; align-items:center; gap:18px; }
+.logo { width:42px; height:42px; border:2px solid var(--blue); border-radius:50%; display:grid; place-items:center; color:var(--blue); font-size:24px; }
+h1 { margin:0; font-size:26px; letter-spacing:-.03em; }
+.badge { padding:5px 10px; border-radius:999px; background:var(--soft); color:var(--blue); font-size:12px; font-weight:700; }
+main { max-width:1280px; margin:0 auto; padding:28px; }
+.grid { display:grid; grid-template-columns: 1.1fr .9fr; gap:20px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:22px; box-shadow:var(--shadow); }
+.card h2 { margin:0 0 14px; font-size:20px; letter-spacing:-.02em; }
+.card h3 { margin:20px 0 10px; font-size:16px; color:#1e3a8a; }
+p, li { line-height:1.7; color:#334155; }
+.kpi { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin:16px 0; }
+.kpi div { background:linear-gradient(180deg,#fff,#f4f8ff); border:1px solid var(--line); border-radius:16px; padding:14px; }
+.kpi strong { display:block; font-size:22px; color:var(--blue); }
+.flow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:14px 0; }
+.node { background:#fff; border:1px solid #bfdbfe; color:#1d4ed8; padding:10px 14px; border-radius:14px; font-weight:700; }
+.arrow { color:var(--blue); font-weight:900; }
+.table-wrap { overflow:auto; border:1px solid var(--line); border-radius:16px; }
+table { width:100%; border-collapse:collapse; background:white; }
+th,td { border-bottom:1px solid #edf2ff; padding:10px 12px; text-align:left; font-size:14px; vertical-align:top; }
+th { background:#f1f6ff; color:#1e40af; position:sticky; top:0; }
+code, pre { background:#0b1b36; color:#dbeafe; border-radius:14px; }
+pre { padding:16px; overflow:auto; }
+.section { margin-bottom:20px; }
+.timeline { display:grid; gap:12px; }
+.timeline .item { border-left:4px solid var(--blue); background:#f8fbff; padding:12px 16px; border-radius:12px; }
+.small { color:var(--muted); font-size:13px; }
+.tag { display:inline-block; padding:3px 8px; border-radius:999px; background:#e0f2fe; color:#0369a1; font-size:12px; margin:2px; }
+.footer { color:var(--muted); font-size:13px; margin:30px 0; }
+@media (max-width: 900px) { .grid,.kpi { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">✦</div>
+    <div>
+      <h1>LifeGame Planning Viewer</h1>
+      <div class="small">Master Plan / ERD v0.2 / Next Tasks · 2026-06-13</div>
+    </div>
+    <span class="badge">Life OS</span>
+    <span class="badge">My Status First</span>
+  </div>
+</header>
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>1. 프로젝트 비전</h2>
+      <p><b>LifeGame</b>은 목표, 프로젝트, 일정, 기억, 인간관계를 하나의 AI가 통합 관리하는 인생 운영체제(Life Operating System)이다.</p>
+      <div class="flow">
+        <span class="node">Life Goal</span><span class="arrow">→</span>
+        <span class="node">Project</span><span class="arrow">→</span>
+        <span class="node">Quest</span><span class="arrow">→</span>
+        <span class="node">Todo</span>
+      </div>
+      <p>첫 화면은 <b>My Status</b>로 확정했다. 역할은 오늘의 현재 상태, 다가오는 일정, 핵심 퀘스트, 진행중인 프로젝트, 프로젝트별 할 일을 한 화면에서 보여주는 것이다.</p>
+    </section>
+    <section class="card">
+      <h2>2. 현재 확정 KPI</h2>
+      <div class="kpi">
+        <div><strong>11</strong><span>v0.2 확정 테이블</span></div>
+        <div><strong>4</strong><span>v0.3 건강 확장 후보</span></div>
+        <div><strong>5</strong><span>MVP 주요 페이지</span></div>
+        <div><strong>1st</strong><span>My Status 먼저 구현</span></div>
+      </div>
+      <p class="small">이 뷰어는 Codex에게 전체 맥락을 전달하기 위한 요약 문서다.</p>
+    </section>
+  </div>
+
+  <section class="card section">
+    <h2>3. My Status 화면 확정 방향</h2>
+    <ul>
+      <li>밝은 톤 기반, 심플하고 모던한 그리드형 UI.</li>
+      <li>아바타/상태 패널은 가장 왼쪽. 아바타는 파란색 실루엣, 배경은 흰색.</li>
+      <li>오른쪽 상단에는 다가오는 일정 1~2개만 표시.</li>
+      <li>그 아래에는 프로젝트별 할 일 리스트를 표시.</li>
+      <li>중앙에는 오늘의 핵심 퀘스트와 진행중인 프로젝트를 배치.</li>
+      <li>운동/식단 요약은 첫 화면에서는 제외하고, 별도 건강/운동/식단 페이지에서 다룬다.</li>
+    </ul>
+  </section>
+
+  <section class="card section">
+    <h2>4. ERD v0.2 확정 테이블</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Table</th><th>Purpose</th><th>Main Relationships</th></tr></thead>
+        <tbody>
+          <tr><td>users</td><td>사용자 기본 정보</td><td>모든 개인 데이터의 owner</td></tr>
+          <tr><td>life_goals</td><td>인생 목표</td><td>users 1:N life_goals</td></tr>
+          <tr><td>projects</td><td>중기 프로젝트</td><td>users 1:N projects</td></tr>
+          <tr><td>life_goal_projects</td><td>목표-프로젝트 다대다 연결</td><td>life_goals N:M projects</td></tr>
+          <tr><td>quests</td><td>중간 달성 단위</td><td>projects 1:N quests</td></tr>
+          <tr><td>quest_relations</td><td>Quest Board 연결</td><td>quests N:M quests</td></tr>
+          <tr><td>todos</td><td>실행 단위</td><td>quests/projects 1:N todos</td></tr>
+          <tr><td>status_logs</td><td>상태 기록</td><td>users 1:N status_logs</td></tr>
+          <tr><td>calendar_events</td><td>일정</td><td>users/projects/quests 연결 가능</td></tr>
+          <tr><td>body_profiles</td><td>신체 프로필 스냅샷</td><td>users 1:N body_profiles</td></tr>
+          <tr><td>body_part_statuses</td><td>부위별 상태</td><td>users 1:N body_part_statuses</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card section">
+    <h2>5. v0.3 건강/운동/식단 확장 후보</h2>
+    <div class="timeline">
+      <div class="item"><b>health_check_logs</b><br><span class="small">검진, 통증, 병원 방문, 건강 체크 기록</span></div>
+      <div class="item"><b>exercise_logs</b><br><span class="small">운동 기록. Quest/Todo와 연결 가능</span></div>
+      <div class="item"><b>meal_logs</b><br><span class="small">식단 기록. 칼로리/탄단지는 nullable로 시작</span></div>
+      <div class="item"><b>water_logs</b><br><span class="small">물 섭취 기록. 목표량 대비 진행률 계산 가능</span></div>
+    </div>
+  </section>
+
+  <section class="card section">
+    <h2>6. Codex 작업 우선순위</h2>
+    <ol>
+      <li>ERD v0.2 기준 PostgreSQL schema 작성</li>
+      <li>seed 데이터 작성</li>
+      <li>My Status API 설계</li>
+      <li>My Status UI 구현</li>
+      <li>Projects / Project Detail / Life To Do 구현</li>
+      <li>Health / Exercise / Diet v0.3 확장</li>
+    </ol>
+  </section>
+
+  <section class="card section">
+    <h2>7. Codex 지시문 샘플</h2>
+    <pre>LifeGame 프로젝트의 ERD v0.2 문서를 기준으로 PostgreSQL schema와 seed 데이터를 작성해줘.
+핵심 구조는 Life Goal → Project → Quest → Todo이며,
+확정 테이블은 users, life_goals, projects, life_goal_projects, quests, quest_relations,
+todos, status_logs, calendar_events, body_profiles, body_part_statuses이다.
+각 테이블의 foreign key, status/priority enum, created_at/updated_at을 포함하고,
+My Status 첫 화면에서 필요한 조회가 쉽도록 index를 함께 설계해줘.</pre>
+  </section>
+
+  <div class="footer">Generated for LifeGame planning handoff · Files: Master Plan MD, Next Tasks MD, ERD MD, ERD JSON, ERD XLSX</div>
+</main>
+</body>
+</html>

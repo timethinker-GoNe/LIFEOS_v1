@@ -1,0 +1,28 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+~$*
+
+# Generated checks and screenshots
+dev/prototypes/*_check.png
+
+# Future JavaScript builds
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+
