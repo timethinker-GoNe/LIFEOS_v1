@@ -1706,8 +1706,129 @@
     const addMenu = document.querySelector("[data-add-menu]");
     const emptyGridLayer = document.querySelector("[data-empty-grid-layer]");
     const editToggleButton = document.querySelector("[data-toggle-edit]");
+    const STORAGE_KEY = "lifegame.myStatus.v1";
     let isEditing = false;
     let selectedEmptyCell = null;
+    let shouldPersistState = false;
+    let currentThemePreset = "clear";
+
+    function collectThemeState() {
+      const values = {};
+      document.querySelectorAll("[data-theme-var]").forEach((input) => {
+        values[input.dataset.themeVar] = input.value;
+      });
+
+      return {
+        preset: currentThemePreset,
+        values
+      };
+    }
+
+    function collectWidgetState() {
+      return Array.from(document.querySelectorAll("[data-widget]")).map((widget) => {
+        const placement = getWidgetPlacement(widget);
+        return {
+          id: widget.dataset.widget,
+          visible: !widget.classList.contains("hidden"),
+          col: placement.col,
+          row: placement.row,
+          cols: placement.cols,
+          rows: placement.rows
+        };
+      });
+    }
+
+    function saveState() {
+      if (!shouldPersistState) {
+        return;
+      }
+
+      const state = {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        theme: collectThemeState(),
+        widgets: collectWidgetState()
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function readSavedState() {
+      try {
+        const rawState = localStorage.getItem(STORAGE_KEY);
+        return rawState ? JSON.parse(rawState) : null;
+      } catch (error) {
+        console.warn("Saved My Status state could not be read.", error);
+        return null;
+      }
+    }
+
+    function restoreThemeState(themeState) {
+      if (!themeState?.values) {
+        return;
+      }
+
+      currentThemePreset = themeState.preset || "custom";
+      Object.entries(themeState.values).forEach(([name, value]) => {
+        setThemeValue(name, value);
+      });
+
+      document.querySelectorAll("[data-theme-var]").forEach((input) => {
+        if (themeState.values[input.dataset.themeVar]) {
+          input.value = themeState.values[input.dataset.themeVar];
+        }
+      });
+    }
+
+    function restoreWidgetState(widgetStates) {
+      if (!Array.isArray(widgetStates)) {
+        return;
+      }
+
+      const statesById = new Map(widgetStates.map((widgetState) => [widgetState.id, widgetState]));
+
+      document.querySelectorAll("[data-widget]").forEach((widget) => {
+        widget.classList.add("hidden");
+      });
+
+      widgetStates.forEach((widgetState) => {
+        const widget = document.querySelector(`[data-widget="${widgetState.id}"]`);
+        if (!widget || widgetState.visible === false) {
+          return;
+        }
+
+        const placement = normalizePlacement(
+          Number(widgetState.col || widget.dataset.col || 1),
+          Number(widgetState.row || widget.dataset.row || 1),
+          Number(widgetState.cols || widget.dataset.cols || 2),
+          Number(widgetState.rows || widget.dataset.rows || 2)
+        );
+
+        if (canPlaceWidget(widget, placement.col, placement.row, placement.cols, placement.rows)) {
+          widget.classList.remove("hidden");
+          setWidgetPlacement(widget, placement.col, placement.row, placement.cols, placement.rows);
+        }
+      });
+
+      document.querySelectorAll("[data-widget]").forEach((widget) => {
+        const widgetState = statesById.get(widget.dataset.widget);
+        if (!widgetState) {
+          widget.classList.remove("hidden");
+        }
+      });
+
+      updateEmptyCells();
+    }
+
+    function restoreSavedState() {
+      const savedState = readSavedState();
+      if (!savedState) {
+        return;
+      }
+
+      restoreThemeState(savedState.theme);
+      restoreWidgetState(savedState.widgets);
+    }
 
     function setEditMode(nextValue) {
       isEditing = nextValue;
@@ -1774,6 +1895,7 @@
         const name = button.dataset.hideWidget;
         document.querySelector(`[data-widget="${name}"]`).classList.add("hidden");
         updateEmptyCells();
+        saveState();
       });
     });
 
@@ -1796,6 +1918,7 @@
         if (placement) {
           widget.classList.remove("hidden");
           setWidgetPlacement(widget, placement.col, placement.row, cols, rows);
+          saveState();
         }
 
         addMenu.classList.remove("open");
@@ -1900,6 +2023,7 @@
       widget.dataset.rows = String(placement.rows);
       widget.dataset.compact = placement.cols <= 2 && placement.rows <= 2 ? "true" : "false";
       updateEmptyCells();
+      saveState();
     }
 
     document.querySelectorAll("[data-size]").forEach((widget) => {
@@ -2050,19 +2174,26 @@
 
     themeInputs.forEach((input) => {
       input.addEventListener("input", () => {
+        currentThemePreset = "custom";
         setThemeValue(input.dataset.themeVar, input.value);
+        saveState();
       });
     });
 
     document.querySelectorAll("[data-theme-preset]").forEach((button) => {
       button.addEventListener("click", () => {
         const preset = presets[button.dataset.themePreset];
+        currentThemePreset = button.dataset.themePreset;
         Object.entries(preset).forEach(([name, value]) => setThemeValue(name, value));
         themeInputs.forEach((input) => {
           input.value = preset[input.dataset.themeVar];
         });
+        saveState();
       });
     });
+
+    restoreSavedState();
+    shouldPersistState = true;
 
   </script>
 </body>

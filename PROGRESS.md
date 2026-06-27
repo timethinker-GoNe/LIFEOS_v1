@@ -103,7 +103,8 @@ Use `sample_images/Real_final.png` as the original visual reference and
   and do not overlap another visible widget.
 - Empty-cell add buttons are hidden for occupied cells.
 - Restoring a hidden widget searches for the nearest free placement to the selected cell.
-- Layout persistence is not implemented.
+- Widget visibility, position, and size are persisted in `localStorage` under
+  `lifegame.myStatus.v1`.
 
 ### Theme Settings
 
@@ -120,14 +121,16 @@ Use `sample_images/Real_final.png` as the original visual reference and
   - primary/button color
   - panel color
   - text color
-- Theme values are not persisted yet.
+- Theme preset/custom color values are persisted in `localStorage` under
+  `lifegame.myStatus.v1`.
 
 ## Known Limitations
 
 - Browser automation was unavailable during much of the prototype work.
 - Several visual changes were checked using user screenshots rather than automated screenshots.
 - Add-widget actions only restore existing prototype widgets.
-- Layout, theme, nickname, and widget choices are not persisted.
+- Nickname is not persisted yet because the prototype does not have a nickname
+  input UI.
 - Mobile behavior has not received the same scrutiny as the tablet layout.
 - The single HTML file contains substantial legacy CSS from discarded iterations and needs cleanup.
 
@@ -136,7 +139,8 @@ Use `sample_images/Real_final.png` as the original visual reference and
 1. Open `dev/prototypes/my_status.html` and visually verify the latest edit-mode behavior.
 2. Fix the viewport height based on the actual tablet/browser viewport if bottom whitespace remains.
 3. Visually test grid collision behavior while dragging and resizing widgets.
-4. Persist nickname, theme, widget visibility, position, and size in `localStorage`.
+4. Add a nickname/profile settings UI if nickname persistence is needed in the
+   prototype.
 5. Clean discarded/unused CSS and markup from the prototype.
 6. Decide whether the My Status prototype is sufficiently stable to extract its data contract.
 
